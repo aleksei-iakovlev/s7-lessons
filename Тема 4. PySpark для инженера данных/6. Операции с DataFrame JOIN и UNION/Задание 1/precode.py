@@ -29,5 +29,8 @@ columns = ['title', 'author', 'book_id']
 columns_library = ['book_id', 'Library_id']
 # создаём датафреймы
 df = spark.createDataFrame(data=book, schema=columns)
-df_library  = spark.createDataFrame(data=library, schema=columns_library )
-# напишите ваш код ниже
+df_library = spark.createDataFrame(data=library, schema=columns_library)
+
+missing = df.join(df_library, ['book_id'], 'anti')
+missing.select('title').distinct().show(100, False)
+missing.show()

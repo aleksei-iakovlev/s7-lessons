@@ -1,9 +1,9 @@
 import sys
- 
+
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SQLContext
-import pyspark.sql.functions as F
- 
+
+
 def main():
         date = sys.argv[1]
         base_input_path = sys.argv[2]
@@ -13,13 +13,12 @@ def main():
         sc = SparkContext(conf=conf)
         sql = SQLContext(sc)
 
- # Напишите директорию чтения в общем виде
-        events = sql.read....
+        events = sql.read.json(f"{base_input_path}/date={date}")
 
-# Напишите директорию записи
-        events\
-        .write\
-        ...
+        events.write.format('parquet') \
+                .partitionBy('event_type') \
+                .mode('append') \
+                .save(f'{base_output_path}/date={date}')
 
 
 if __name__ == "__main__":

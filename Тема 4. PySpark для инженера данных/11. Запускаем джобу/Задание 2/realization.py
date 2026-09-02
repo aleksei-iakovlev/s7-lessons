@@ -1,0 +1,1 @@
+spark-submit --master yarn --num-executors 10 --deploy-mode cluster partition.py 2022-05-31 /user/master/data/events /user/s19290263/data/events

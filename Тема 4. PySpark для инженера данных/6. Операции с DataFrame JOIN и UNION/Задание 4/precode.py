@@ -26,9 +26,11 @@ book_2 = [
         ('The Truth', 576 ,'Terry Pratchett')
 ]
 # названия атрибутов
-columns_1= ['title', 'author', 'book_id']
+columns_1 = ['title', 'author', 'book_id']
 columns_2 = ['title', 'book_id', 'author']
 # создаём датафреймы
-df_1 = spark.createDataFrame(data=book_1 , schema=columns_1)
-df_2  = spark.createDataFrame(data=book_2 , schema=columns_2)
+df_1 = spark.createDataFrame(data=book_1, schema=columns_1)
+df_2 = spark.createDataFrame(data=book_2, schema=columns_2)
 # напишите ваш код ниже
+un_df = df_1.unionbyname(df_2, )
+un_df.show(100, False)

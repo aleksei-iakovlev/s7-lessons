@@ -1,1 +1,15 @@
 Сохраните сюда результат вывода:
+== Physical Plan ==
+InMemoryTableScan [title#1236]
+   +- InMemoryRelation [title#1236], StorageLevel(disk, memory, deserialized, 1 replicas)
+         +- *(5) Project [title#1236]
+            +- *(5) SortMergeJoin [book_id#1238L], [book_id#1242L], LeftAnti
+               :- *(2) Sort [book_id#1238L ASC NULLS FIRST], false, 0
+               :  +- Exchange hashpartitioning(book_id#1238L, 200), ENSURE_REQUIREMENTS, [plan_id=5455]
+               :     +- *(1) Project [title#1236, book_id#1238L]
+               :        +- *(1) Scan ExistingRDD[title#1236,author#1237,book_id#1238L]
+               +- *(4) Sort [book_id#1242L ASC NULLS FIRST], false, 0
+                  +- Exchange hashpartitioning(book_id#1242L, 200), ENSURE_REQUIREMENTS, [plan_id=5461]
+                     +- *(3) Project [book_id#1242L]
+                        +- *(3) Filter isnotnull(book_id#1242L)
+                           +- *(3) Scan ExistingRDD[book_id#1242L,Library_id#1243]

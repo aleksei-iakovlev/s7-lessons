@@ -40,4 +40,4 @@ df_library  = spark.createDataFrame(data=library, schema=columns_library )
 df_join = df.join(df_library,['book_id'], 'leftanti').select('title')
 df_cache= df_join.cache()
 
-# сделайте контрольную точку на df_cache
+df_cache.checkpoint()
