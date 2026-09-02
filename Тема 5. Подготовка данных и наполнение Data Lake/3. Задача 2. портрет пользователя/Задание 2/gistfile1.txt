@@ -3,20 +3,26 @@ import pyspark.sql.functions as F
 from pyspark.sql.window import Window
 
 
+spark = SparkSession.builder \
+    .master("yarn") \
+    .appName("reactions_tops") \
+    .getOrCreate()
+
+
 def input_event_paths(date, depth):
     dt = datetime.datetime.strptime(date, '%Y-%m-%d')
-    return [f"/user/s28509656/data/events/date={(dt - datetime.timedelta(days=x)).strftime('%Y-%m-%d')}" for x in
+    return [f"/user/s19290263/data/events/date={(dt - datetime.timedelta(days=x)).strftime('%Y-%m-%d')}" for x in
             range(depth)]
 
 
 def reaction_tag_tops(date, depth, spark):
     reaction_paths = input_event_paths(date, depth)
     reactions = spark.read\
-    .option("basePath", "/user/s28509656/data/events")\
+    .option("basePath", "/user/s19290263/data/events")\
     .parquet(*reaction_paths)\
     .where("event_type='reaction'")
 
-    all_message_tags = spark.read.parquet("/user/s28509656/data/events")\
+    all_message_tags = spark.read.option("mergeSchema", "true").parquet("/user/s19290263/data/events")\
     .where("event_type='message' and event.message_channel_to is not null")\
     .select(F.col("event.message_id").alias("message_id"),
             F.col("event.message_from").alias("user_id"),
@@ -57,9 +63,10 @@ def reaction_tag_tops(date, depth, spark):
     result = like_tops\
     .join(dislike_tops, "user_id", "full_outer")
     print("here 1 ")
-    result.write.mode("overwrite").parquet(f"/user/s28509656/data/tmp/reaction_tag_tops_{date[5:7]}_{date[8:10]}_{depth}")
+    result.write.mode("overwrite").parquet(f"/user/s19290263/data/tmp/reaction_tag_tops_{date[5:7]}_{date[8:10]}_{depth}")
     return None
 
+# reaction_tag_tops('2022-05-31', 7, spark)
 depths=[5,5,1]
 dates=['2022-05-04', '2022-04-04', '2022-04-04']
 s = zip(dates,depths)
