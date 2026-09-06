@@ -38,7 +38,7 @@ def submit(t_code, rlz_file=''):
 
     print(f'HOST: {USER_HOST}')
 
-    # print(f'{TerminalColors.OKGREEN}Для создания подключения потребуется некоторое время...{TerminalColors.ENDC}')
+    print(f'{TerminalColors.OKGREEN}Для создания подключения потребуется некоторое время...{TerminalColors.ENDC}')
 
     try:
         r = requests.post(
@@ -58,11 +58,11 @@ def submit(t_code, rlz_file=''):
     print(r.json()['stdout'].replace('__test',rlz_file[:-3]))
 
 if __name__ == '__main__':
-    # from time import time
-    # start = time()
+    from time import time
+    start = time()
     submit(
         'de07050401'
     )
-    # end = time()
-    # print(end-start)
+    end = time()
+    print(end-start)
 

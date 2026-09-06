@@ -17,7 +17,7 @@ def tag_tops(date, depth, spark):
     
     user_tags_count = messages.distinct().selectExpr(["event.message_from as user_id", "explode(event.tags) as tag"])\
         .groupBy("user_id", "tag")\
-        .agg(F.count("*").alias("tag_count")).show()
+        .agg(F.count("*").alias("tag_count"))
 
     window = Window.partitionBy("user_id").orderBy(F.desc("tag_count"), F.desc("tag"))
 

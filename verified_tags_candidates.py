@@ -14,7 +14,7 @@ def main():
     dst = sys.argv[6]
 
     spark = SparkSession.builder \
-                    .master("local") \
+                    .master("yarn") \
                     .appName(f"VerifiedTagsCandidatesJob-{date}-d{depth}-cut{treshold}") \
                     .getOrCreate()
 
@@ -27,12 +27,11 @@ def main():
     all_tags = messages.where("event.message_channel_to is not null")\
         .selectExpr(["event.message_from as user", "explode(event.tags) as tag"])\
         .groupBy("tag").agg(F.expr("count(distinct user) as suggested_count"))\
-        .where("suggested_count >= {treshold}")
+        .where(f"suggested_count >= {treshold}")
 
     verified_tags = spark.read.parquet(src_tags_v)
     candidates = all_tags.join(verified_tags, "tag", "left_anti")
-    candidates.show()
-    candidates.write.mode('overwrite').parquet(f'{dst}/date={date}/verified_tags_candidates.py')
+    candidates.write.mode('overwrite').parquet(f'{dst}/date={date}')
 
 
 if __name__ == "__main__":

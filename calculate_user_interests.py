@@ -25,14 +25,21 @@ def calculate_user_interests(date, depth, spark):
         .parquet(*reaction_paths)\
         .where("event_type='reaction'")
     
-    all_message_tags = spark.read.parquet(*reaction_paths)\
+    all_message_tags = spark.read\
+        .option("mergeSchema", "true")\
+        .parquet("/user/s19290263/data/events")\
         .where("event_type='message'")\
         .select(F.col("event.message_id").alias("message_id"),
                 F.col("event.message_from").alias("user_id"),
                 F.explode(F.col("event.tags")).alias("tag")
         )
-    
-    user_tags_count = all_message_tags.distinct()\
+       
+    messages = spark.read\
+        .option("basePath", "/user/s19290263/data/events")\
+        .parquet(*reaction_paths)\
+        .where("event_type='message'")
+
+    user_tags_count = messages.distinct().selectExpr(["event.message_from as user_id", "explode(event.tags) as tag"])\
         .groupBy("user_id", "tag")\
         .agg(F.count("*").alias("tag_count"))
 
@@ -77,12 +84,11 @@ def calculate_user_interests(date, depth, spark):
     result = top_3_tags.join(semi_result, "user_id", "full_outer").distinct()
     
     result.write.mode("overwrite").parquet(f"/user/s19290263/data/tmp/user_interests_{date[5:7]}_{date[8:10]}_{depth}")
-    
+
     return None
 
-calculate_user_interests('2022-04-04', 5, spark)
-# depths=[5,5,1]
-# dates=['2022-05-04', '2022-04-04', '2022-04-04']
-# s = zip(dates,depths)
-# for date,depth in s:
-#     reaction_tag_tops(date, depth, spark)
+depths=[5,5,1]
+dates=['2022-05-04', '2022-04-04', '2022-04-04']
+s = zip(dates,depths)
+for date,depth in s:
+    calculate_user_interests(date, depth, spark)
